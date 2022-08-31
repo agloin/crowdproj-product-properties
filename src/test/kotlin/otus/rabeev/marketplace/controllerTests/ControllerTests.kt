@@ -14,7 +14,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import otus.rabeev.marketplace.dto.RequestDto
 import otus.rabeev.marketplace.dto.ResponseDto
-import otus.rabeev.marketplace.service.PropertyService
+import otus.rabeev.marketplace.service.RequestPropertyService
+
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -25,12 +26,12 @@ class ControllerTests() {
     private lateinit var testRestTemplate: TestRestTemplate
 
     @MockBean
-    lateinit var propertyService: PropertyService
+    lateinit var requestPropertyService: RequestPropertyService
 
 
     @Test
     fun `test controller propertyRequest success`() {
-        val requestDto = RequestDto("123e4567-e89b-12d3-a456-426655440001")
+        val requestDto = RequestDto("123e4567-e89b-12d3-a456-426655440003", "correctDB")
         val responseDto = ResponseDto(
             id = "id is correct",
             name = "name",
@@ -39,37 +40,43 @@ class ControllerTests() {
             unitMain = "unitMain"
         )
 
-        given(propertyService.propertyFromDB(requestDto)).willReturn(responseDto)
+
+        given(requestPropertyService.requestPropertyFromDB(requestDto)).willReturn(responseDto)
 
 
         val response = testRestTemplate.exchange<ResponseDto>(
-            "/property-request",
+            "/product-property-request",
             HttpMethod.POST,
             getHttpEntity(requestDto)
         )
 
 
         val dto = response.body
+
         assertNotNull(dto)
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(responseDto, dto)
-
     }
+
 
     @Test
     fun `test controller propertyRequest with incorrect RequestDto`() {
-        val requestDto = RequestDto("wrong format")
+        val requestDto = RequestDto("wrong format", "correctDB")
         val responseDto = ResponseDto()
 
 
+
+
+
         val response = testRestTemplate.exchange<ResponseDto>(
-            "/property-request",
+            "/product-property-request",
             HttpMethod.POST,
             getHttpEntity(requestDto)
         )
 
 
         val dto = response.body
+
         assertNotNull(dto)
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
         assertEquals(responseDto, dto)
